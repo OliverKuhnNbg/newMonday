@@ -1,0 +1,91 @@
+<!-- src/app/features/device-list/device-list.component.html -->
+<div class="device-list-layout">
+  <header class="list-header">
+    <h1>FleetBoard Devices</h1>
+
+    <div class="controls" role="search">
+      <!-- Why: Explicit labels ensure screen reader accessibility -->
+      <label for="search-input">Search Devices</label>
+      <input
+        id="search-input"
+        type="text"
+        [value]="queryParams()?.['q'] || ''"
+        (input)="onSearch($event)"
+        placeholder="Enter name or serial..."
+      />
+
+      <label for="status-filter">Status</label>
+      <select
+        id="status-filter"
+        [value]="queryParams()?.['status'] || ''"
+        (change)="updateFilter('status', $any($event.target).value)"
+      >
+        <option value="">All</option>
+        <option value="online">Online</option>
+        <option value="offline">Offline</option>
+        <option value="maintenance">Maintenance</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Why: aria-live region announces loading and error states without stealing focus -->
+  <div aria-live="polite" class="status-announcer">
+    @if (loading()) {
+      <div class="spinner" role="status">
+        <span class="sr-only">Loading devices...</span>
+      </div>
+    }
+    @if (error()) {
+      <div class="error-banner" role="alert">
+        <span aria-hidden="true">❌</span>
+        An error occurred: {{ error() }}
+        <button type="button" (click)="retry()">Retry Connection</button>
+      </div>
+    }
+  </div>
+
+  @if (!loading() && !error()) {
+    <table aria-label="Device Status Overview">
+      <thead>
+        <tr>
+          <!-- Why: Interactive column headers must be accessible via keyboard -->
+          <th scope="col">
+            <button type="button" (click)="updateFilter('sort', 'name')">Name</button>
+          </th>
+          <th scope="col">
+            <button type="button" (click)="updateFilter('sort', 'status')">Status</button>
+          </th>
+          <th scope="col">Battery</th>
+          <th scope="col">Location</th>
+          <th scope="col">Last Seen</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (device of devices(); track device.id) {
+          <tr>
+            <td>{{ device.name }}</td>
+            <!-- Why: Status is not only color-coded, but paired with explicit text and icons -->
+            <td>
+              @if (device.status === 'online') {
+                <span>✅ Online</span>
+              }
+              @if (device.status === 'offline') {
+                <span>❌ Offline</span>
+              }
+              @if (device.status === 'maintenance') {
+                <span>⚠️ Maintenance</span>
+              }
+            </td>
+            <td>{{ device.battery }}%</td>
+            <td>{{ device.locationName }}</td>
+            <td>{{ device.lastSeen | date: 'short' }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5">No devices matched your criteria.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

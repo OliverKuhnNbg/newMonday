@@ -1,3 +1,4 @@
+// src/app/app.ts (oder app.component.ts)
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
@@ -5,9 +6,7 @@ import { RouterOutlet } from '@angular/router';
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet],
-  // ARCHITECTURE: The root component acts strictly as a shell.
-  // By delegating the view immediately to the RouterOutlet, we enforce that all feature
-  // states (like the device list's active filters) are entirely driven by the URL routing tree.
-  template: `<router-outlet></router-outlet>`,
+  template: `<router-outlet></router-outlet>`, // Rendert unsere routbaren Features
 })
-export class AppComponent {}
+// ACHTUNG: Hier muss der Name mit dem Import in der main.ts übereinstimmen!
+export class App {}
